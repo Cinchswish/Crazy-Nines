@@ -1,7 +1,7 @@
 import { Suit, Rank, Card, CardColor } from './types';
 
-export const SUITS: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades', 'stars'];
-export const RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+export const SUITS: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades', 'stars', 'moons'];
+export const RANKS: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
 export const SUIT_SYMBOLS: Record<Suit, string> = {
   hearts: '♥',
@@ -9,6 +9,7 @@ export const SUIT_SYMBOLS: Record<Suit, string> = {
   clubs: '♣',
   spades: '♠',
   stars: '★',
+  moons: '🌙',
 };
 
 export const SUIT_COLORS: Record<Suit, string> = {
@@ -17,6 +18,7 @@ export const SUIT_COLORS: Record<Suit, string> = {
   clubs: 'text-slate-900',
   spades: 'text-slate-900',
   stars: 'text-yellow-500',
+  moons: 'text-indigo-500',
 };
 
 export const SUIT_NAMES_ZH: Record<Suit, string> = {
@@ -25,18 +27,20 @@ export const SUIT_NAMES_ZH: Record<Suit, string> = {
   clubs: '梅花',
   spades: '黑桃',
   stars: '星星',
+  moons: '月亮',
 };
 
-export const CARD_COLOR_CONFIG: Record<CardColor, { name: string, drawExtra: number, rarity: number, bg: string, text: string }> = {
-  none: { name: '普通', drawExtra: 0, rarity: 500, bg: 'bg-white', text: 'text-slate-900' },
-  white: { name: '白', drawExtra: 1, rarity: 200, bg: 'bg-slate-100', text: 'text-slate-700' },
-  green: { name: '绿', drawExtra: 2, rarity: 120, bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  blue: { name: '蓝', drawExtra: 3, rarity: 80, bg: 'bg-blue-100', text: 'text-blue-700' },
-  purple: { name: '紫', drawExtra: 4, rarity: 50, bg: 'bg-purple-100', text: 'text-purple-700' },
-  pink: { name: '粉', drawExtra: 5, rarity: 30, bg: 'bg-pink-100', text: 'text-pink-700' },
-  red: { name: '红', drawExtra: 6, rarity: 15, bg: 'bg-red-100', text: 'text-red-700' },
-  gold: { name: '金', drawExtra: 7, rarity: 4, bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  rainbow: { name: '彩', drawExtra: 8, rarity: 1, bg: 'bg-gradient-to-br from-red-200 via-green-200 to-blue-200', text: 'text-slate-900' },
+export const CARD_COLOR_ORDER: CardColor[] = ['green', 'blue', 'purple', 'pink', 'red', 'gold', 'rainbow'];
+
+export const CARD_COLOR_CONFIG: Record<CardColor, { name: string, drawExtra: number, rarity: number, bg: string, text: string, border: string }> = {
+  none: { name: '普通', drawExtra: 0, rarity: 300, bg: 'bg-white', text: 'text-slate-900', border: 'border-slate-200' },
+  green: { name: '绿', drawExtra: 2, rarity: 150, bg: 'bg-emerald-500', text: 'text-emerald-900', border: 'border-emerald-500' },
+  blue: { name: '蓝', drawExtra: 3, rarity: 120, bg: 'bg-blue-500', text: 'text-blue-900', border: 'border-blue-500' },
+  purple: { name: '紫', drawExtra: 4, rarity: 100, bg: 'bg-purple-600', text: 'text-purple-900', border: 'border-purple-600' },
+  pink: { name: '粉', drawExtra: 5, rarity: 80, bg: 'bg-pink-500', text: 'text-pink-900', border: 'border-pink-500' },
+  red: { name: '红', drawExtra: 6, rarity: 60, bg: 'bg-red-600', text: 'text-red-900', border: 'border-red-600' },
+  gold: { name: '金', drawExtra: 7, rarity: 40, bg: 'bg-yellow-400', text: 'text-yellow-900', border: 'border-yellow-500' },
+  rainbow: { name: '彩', drawExtra: 8, rarity: 20, bg: 'bg-gradient-to-br from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-500', text: 'text-white', border: 'border-white/50' },
 };
 
 function getRandomColor(): CardColor {
@@ -56,12 +60,15 @@ export function createDeck(): Card[] {
   for (let i = 0; i < 2; i++) {
     for (const suit of SUITS) {
       for (const rank of RANKS) {
+        // Only add '9' in the first deck iteration to reduce its frequency by half
+        if (rank === '9' && i > 0) continue;
+
         deck.push({
           id: `${rank}-${suit}-${i}-${Math.random().toString(36).substr(2, 9)}`,
           suit,
           rank,
           isWild: rank === '9',
-          color: getRandomColor(),
+          color: rank === '9' ? 'none' : getRandomColor(),
         });
       }
     }

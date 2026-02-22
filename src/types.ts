@@ -1,7 +1,7 @@
-export type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades' | 'stars';
+export type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades' | 'stars' | 'moons';
 export type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K';
 
-export type CardColor = 'none' | 'white' | 'green' | 'blue' | 'purple' | 'pink' | 'red' | 'gold' | 'rainbow';
+export type CardColor = 'none' | 'green' | 'blue' | 'purple' | 'pink' | 'red' | 'gold' | 'rainbow';
 
 export interface Card {
   id: string;
@@ -18,6 +18,7 @@ export type PlayerId = 'player' | 'ai1' | 'ai2' | 'ai3';
 export interface GameState {
   deck: Card[];
   hands: Record<PlayerId, Card[]>;
+  activePlayers: PlayerId[];
   discardPile: Card[];
   currentSuit: Suit;
   currentRank: Rank;

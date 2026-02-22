@@ -8,7 +8,7 @@ interface SuitSelectorProps {
 }
 
 export const SuitSelector: React.FC<SuitSelectorProps> = ({ onSelect }) => {
-  const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades', 'stars'];
+  const suits: Suit[] = ['hearts', 'diamonds', 'clubs', 'spades', 'stars', 'moons'];
 
   return (
     <motion.div

@@ -12,6 +12,7 @@ export const useGameLogic = () => {
       ai2: [],
       ai3: [],
     },
+    activePlayers: ['player', 'ai1', 'ai2', 'ai3'],
     discardPile: [],
     currentSuit: 'hearts',
     currentRank: 'A',
@@ -23,13 +24,18 @@ export const useGameLogic = () => {
     cardsPlayedThisTurn: 0,
   });
 
-  const initGame = useCallback(() => {
+  const initGame = useCallback((aiCount: number = 3) => {
     const fullDeck = createDeck();
+    const activePlayers: PlayerId[] = ['player'];
+    for (let i = 1; i <= aiCount; i++) {
+      activePlayers.push(`ai${i}` as PlayerId);
+    }
+
     const hands: Record<PlayerId, Card[]> = {
       player: fullDeck.splice(0, 12),
-      ai1: fullDeck.splice(0, 12),
-      ai2: fullDeck.splice(0, 12),
-      ai3: fullDeck.splice(0, 12),
+      ai1: aiCount >= 1 ? fullDeck.splice(0, 12) : [],
+      ai2: aiCount >= 2 ? fullDeck.splice(0, 12) : [],
+      ai3: aiCount >= 3 ? fullDeck.splice(0, 12) : [],
     };
     
     let firstDiscardIndex = 0;
@@ -41,6 +47,7 @@ export const useGameLogic = () => {
     setState({
       deck: fullDeck,
       hands,
+      activePlayers,
       discardPile: [firstDiscard],
       currentSuit: firstDiscard.suit,
       currentRank: firstDiscard.rank,
@@ -51,14 +58,21 @@ export const useGameLogic = () => {
       hasPlayedThisTurn: false,
       cardsPlayedThisTurn: 0,
     });
+
+    // Start sound/effect
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#6366f1', '#a855f7', '#ec4899']
+    });
   }, []);
 
   const endTurn = useCallback(() => {
     setState(prev => {
-      const playerOrder: PlayerId[] = ['player', 'ai1', 'ai2', 'ai3'];
-      const currentIndex = playerOrder.indexOf(prev.turn);
-      const nextIndex = (currentIndex + 1) % playerOrder.length;
-      const nextPlayer = playerOrder[nextIndex];
+      const currentIndex = prev.activePlayers.indexOf(prev.turn);
+      const nextIndex = (currentIndex + 1) % prev.activePlayers.length;
+      const nextPlayer = prev.activePlayers[nextIndex];
 
       return {
         ...prev,
@@ -145,10 +159,9 @@ export const useGameLogic = () => {
       const extraToDraw = topCard ? CARD_COLOR_CONFIG[topCard.color].drawExtra : 0;
       const totalToDraw = 3 + extraToDraw;
 
-      const playerOrder: PlayerId[] = ['player', 'ai1', 'ai2', 'ai3'];
-      const currentIndex = playerOrder.indexOf(prev.turn);
-      const nextIndex = (currentIndex + 1) % playerOrder.length;
-      const nextPlayer = playerOrder[nextIndex];
+      const currentIndex = prev.activePlayers.indexOf(prev.turn);
+      const nextIndex = (currentIndex + 1) % prev.activePlayers.length;
+      const nextPlayer = prev.activePlayers[nextIndex];
 
       if (prev.deck.length < totalToDraw) {
         // Simple reshuffle if deck is low
@@ -204,7 +217,7 @@ export const useGameLogic = () => {
           const cardToPlay = nonNines.length > 0 ? nonNines[0] : playableCards[0];
           
           if (cardToPlay.rank === '9') {
-            const suitCounts: Record<Suit, number> = { hearts: 0, diamonds: 0, clubs: 0, spades: 0, stars: 0 };
+            const suitCounts: Record<Suit, number> = { hearts: 0, diamonds: 0, clubs: 0, spades: 0, stars: 0, moons: 0 };
             aiHand.forEach(c => suitCounts[c.suit]++);
             const bestSuit = (Object.keys(suitCounts) as Suit[]).reduce((a, b) => suitCounts[a] > suitCounts[b] ? a : b);
             
@@ -234,7 +247,7 @@ export const useGameLogic = () => {
             drawCard(currentAi);
           }
         }
-      }, 800);
+      }, 400);
 
       return () => clearTimeout(timer);
     }
@@ -243,15 +256,25 @@ export const useGameLogic = () => {
   // Check win conditions
   useEffect(() => {
     if (state.status === 'playing') {
-      (Object.keys(state.hands) as PlayerId[]).forEach(pid => {
+      state.activePlayers.forEach(pid => {
         checkWin(state.hands[pid], pid);
       });
     }
-  }, [state.hands, state.status, checkWin]);
+  }, [state.hands, state.status, state.activePlayers, checkWin]);
+
+  const resetGame = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      status: 'waiting',
+      winner: null,
+      lastAction: '欢迎来到疯狂 9 点！',
+    }));
+  }, []);
 
   return {
     state,
     initGame,
+    resetGame,
     playCard: (card: Card) => playCard(card, true),
     drawCard: () => drawCard('player'),
     selectSuit,
