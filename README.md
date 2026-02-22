@@ -1,11 +1,25 @@
-<div align="center">
+# 疯狂 9 点 (Crazy Nines) - Vercel 部署指南
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+这是一个基于 Vite + React 的纸牌游戏。你可以轻松地将其部署到 Vercel。
 
-  <h1>Built with AI Studio</h2>
+## 部署步骤
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+1. **推送代码到 GitHub/GitLab/Bitbucket**。
+2. **在 Vercel 中导入项目**。
+3. **配置环境变量**：
+   - 在 Vercel 项目设置中，添加 `GEMINI_API_KEY` 环境变量（如果你的应用需要调用 Gemini API）。
+4. **部署**：
+   - Vercel 会自动识别 Vite 项目并运行 `npm run build`。
+   - 构建输出目录默认为 `dist`。
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## 项目配置说明
 
-</div>
+- `vercel.json`：配置了单页应用 (SPA) 的路由重写，确保刷新页面时不会出现 404。
+- `vite.config.ts`：处理了环境变量的注入。
+
+## 本地开发
+
+```bash
+npm install
+npm run dev
+```
